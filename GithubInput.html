@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Front End Programming / React</title>
+  </head>
+  <body>
+    <!-- We will put our React component inside this div. -->
+    <div id="root"></div>
+
+    <!-- Load React & Babel -->
+    <!-- Note: when deploying, replace "development.js" with "production.min.js". -->
+    <script
+      src="https://unpkg.com/react@18/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+
+    <!-- React component code -->
+    <script type="text/babel">
+      function RepositoryList() {
+        const [repository, setRepository] = React.useState([]);
+        const [searchKeyword, setSearchKeyword] = React.useState("");
+
+        const fetchRepositories = () => {
+          fetch(`https://api.github.com/search/repositories?q=${searchKeyword}`)
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Error in request: " + response.statusText);
+              }
+              return response.json();
+            })
+            .then((responseData) => {
+              setRepository(responseData.items);
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        };
+
+        return (
+          <React.Fragment>
+            <h2> Repositories</h2>
+
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={(e) => setSearchKeyword(e.target.value)}
+              placeholder="Enter search keyword..."
+            />
+
+            <button onClick={fetchRepositories}>Search</button>
+
+            <table>
+              <tbody>
+                <tr>
+                  <th>Name</th>
+                  <th>URL</th>
+                </tr>
+                {repository.map((repository) => (
+                  <tr key={repository.id}>
+                    <td>{repository.full_name}</td>
+                    <td>
+                      <a href={repository.html_url}>{repository.html_url}</a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </React.Fragment>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<RepositoryList />);
+    </script>
+  </body>
+</html>
